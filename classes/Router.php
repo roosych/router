@@ -3,36 +3,40 @@
 
 class Router {
 
-    // Переменная для хранения получаемый маршрутов
-    private $routes;
+    //массив где храним все маршруты
+    private static $routes = [];
 
-    /**
-     * Router constructor.
-     * При вызове класса подключаем файл с маршрутами
-     */
-    public function __construct() {
-        $routesPath = include '../config/routes.php';
-        $this->routes = $routesPath;
+    //метод для добавления маршрутов в массив
+    public static function page($uri, $page_name) {
+        self::$routes[] = [
+            'uri' => $uri,
+            'page_name' => $page_name
+        ];
     }
 
-
-    /**
-     * @return mixed
-     * Получаем строку запроса
-     */
-    private function getURI() {
+    //получаем введенный урл
+    public static function getURI() {
         return $_SERVER['REQUEST_URI'];
     }
 
+    //если нету маршрута - показываем страницу 404
+    private static function notFound() {
+        include '../controllers/404.php';
+    }
 
-    public function start() {
-        $uri = $this->getURI();
+    //запуск роутера
+    public static function run() {
+        $uri = self::getURI();
 
-        if(array_key_exists($uri, $this->routes)) {
-            include $this->routes[$uri];
-            exit();
-        } else {
-            include $this->routes['404'];
+        //перебираем массив маршрутов, если маршрут совпадает в введенным урлом,
+        //то показываем страницу с таким названием и сразу же прекращаем работу скрипта
+        foreach (self::$routes as $route) {
+            if($route['uri'] === $uri) {
+                include '../controllers/' .$route['page_name']. '.php';
+                exit();
+            }
         }
+        //иначе показываем 404
+        self::notFound();
     }
 }

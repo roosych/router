@@ -1,7 +1,6 @@
 <?php
 
 include '../classes/Router.php';
+include '../config/routes.php';
 
-$router = new Router();
-
-$router->start();
+Router::run();
